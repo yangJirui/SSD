@@ -20,7 +20,7 @@ def add_vgg(cfg, batch_norm=False):
             in_channels = v
     pool5 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
     conv6 = nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6)
-    conv7 = nn.Conv2d(1024, 1024, kernel_size=1)
+    conv7 = nn.Conv2d(1024, 1024, kernel_size=1)  # fc7
     layers += [pool5, conv6,
                nn.ReLU(inplace=True), conv7, nn.ReLU(inplace=True)]
     return layers
@@ -54,7 +54,7 @@ def add_header(vgg, extra_layers, boxes_per_location, num_classes):
                                          boxes_per_location[k] * 4, kernel_size=3, padding=1)]
         classification_headers += [nn.Conv2d(vgg[v].out_channels,
                                              boxes_per_location[k] * num_classes, kernel_size=3, padding=1)]
-    for k, v in enumerate(extra_layers[1::2], 2):
+    for k, v in enumerate(extra_layers[1::2], 2):  # conv8_2, conv9_2, conv10_2, conv11_2
         regression_headers += [nn.Conv2d(v.out_channels, boxes_per_location[k]
                                          * 4, kernel_size=3, padding=1)]
         classification_headers += [nn.Conv2d(v.out_channels, boxes_per_location[k]
@@ -71,11 +71,18 @@ def build_ssd_model(cfg):
         '512': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'C', 512, 512, 512, 'M',
                 512, 512, 512],
     }
+    # C1_2, M, C2_2, M, C3_3, C, C4_3(22th), M, C5_3(29th)
+    # [  1, 2,    2, 4,    4, 8,          8, 16,       16]
+
     extras_base = {
         '300': [256, 'S', 512, 128, 'S', 256, 128, 256, 128, 256],
         '512': [256, 'S', 512, 128, 'S', 256, 128, 'S', 256, 128, 'S', 256],
     }
+    # conv8_1, conv8_2(s=2, c=512), conv9_1, conv9_2(s=2, c=256)
+    # [16,               32,      32,           64
 
+    # what SSD select is C4_3, fc7, conv8_2, conv9_2, conv10_2(c=256), conv11_2
+    # stride is             8,  16,      32,      64,         64(128),  (64)256
     boxes_per_location = cfg.MODEL.PRIORS.BOXES_PER_LOCATION
 
     vgg_config = vgg_base[str(size)]

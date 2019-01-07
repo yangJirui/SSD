@@ -38,7 +38,8 @@ def convert_boxes_to_locations(center_form_boxes, center_form_priors, center_var
     ], dim=center_form_boxes.dim() - 1)
 
 
-def area_of(left_top, right_bottom) -> torch.Tensor:
+# def area_of(left_top, right_bottom) -> torch.Tensor:
+def area_of(left_top, right_bottom):  # remove annotation to suit for py27
     """Compute the areas of rectangles given two corners.
 
     Args:

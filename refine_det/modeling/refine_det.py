@@ -9,7 +9,7 @@ from ssd.module.prior_box import PriorBox
 from ssd.utils import box_utils
 
 
-class SSD(nn.Module):
+class RefineDet(nn.Module):
     # def __init__(self, cfg,
     #              vgg: nn.ModuleList,
     #              extras: nn.ModuleList,
@@ -20,9 +20,9 @@ class SSD(nn.Module):
                  extras,
                  classification_headers,
                  regression_headers):  # to suit py2 and py3
-        """Compose a SSD model using the given components.
+        """Compose a RefineDet model using the given components.
         """
-        super(SSD, self).__init__()
+        super(RefineDet, self).__init__()
         self.cfg = cfg
         self.num_classes = cfg.MODEL.NUM_CLASSES
         self.vgg = vgg
@@ -33,6 +33,7 @@ class SSD(nn.Module):
         self.criterion = MultiBoxLoss(neg_pos_ratio=cfg.MODEL.NEG_POS_RATIO)
         self.priors = None
         self.reset_parameters()
+        self.fet_transformer =
 
     def reset_parameters(self):
         def weights_init(m):
@@ -103,7 +104,6 @@ class SSD(nn.Module):
 
     def save(self, model_path):
         torch.save(self.state_dict(), model_path)
-
 
 class MatchPrior(object):
     def __init__(self, center_form_priors, center_variance, size_variance, iou_threshold):
